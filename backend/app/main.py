@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.database import engine, Base
 import app.models  # noqa: F401
+from app.routers import uploads  # ← agregar
 
 app = FastAPI(
     title="ReOrdena-ABC API",
@@ -23,6 +24,7 @@ app.add_middleware(
 def on_startup():
     Base.metadata.create_all(bind=engine)
 
+app.include_router(uploads.router)  # ← agregar antes del @app.get("/health")
 
 @app.get("/health", tags=["Sistema"])
 def health_check():

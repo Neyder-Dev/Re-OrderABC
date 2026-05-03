@@ -20,7 +20,7 @@ class Product(Base):
     weight_kg = Column(Numeric(8, 3), nullable=True)
 
     abc_zone = Column(String(1), nullable=True)        # 'A', 'B' o 'C'
-    abc_percentage = Column(Numeric(6, 4), nullable=True)
+    abc_percentage = Column(Numeric(10, 4), nullable=True)
 
     is_active = Column(Boolean, default=True, nullable=False)
 
