@@ -12,4 +12,14 @@ export const uploadMatr780 = (file) => {
   })
 }
 
+export const uploadMatr425 = (file) => {
+  const formData = new FormData()
+  formData.append('file', file)
+  return api.post('/inventory/upload-stock', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  })
+}
+
+export const getMapa = () => api.get('/products/mapa')
+
 export default api
