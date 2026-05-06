@@ -4,7 +4,7 @@ import StatsBar from "../components/StatsBar";
 import RackMap from "../components/RackMap";
 import { getMapa } from "../services/api";
 import useAuthStore from "../store/authStore";
-import api from '../services/api'
+import api from "../services/api";
 
 function Dashboard() {
   const [uploadResult, setUploadResult] = useState(null);
@@ -159,7 +159,12 @@ function Dashboard() {
               </div>
             )}
 
-            <RackMap productos={productos} />
+            <RackMap
+              productos={productos}
+              onMapaActualizado={() =>
+                getMapa().then(({ data: mapa }) => setProductos(mapa.productos))
+              }
+            />
           </>
         )}
 
