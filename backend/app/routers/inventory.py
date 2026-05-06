@@ -8,11 +8,12 @@ from app.models.product import Product
 from app.models.warehouse_position import WarehousePosition
 from app.services.inventory_cleansing import clean_matr425
 from app.services.position_assigner import assign_positions
+from app.core.security import require_jefe
 
 router = APIRouter(prefix="/inventory", tags=["Inventario"])
 
 
-@router.post("/upload-stock", response_model=dict)
+@router.post("/upload-stock", response_model=dict, dependencies=[Depends(require_jefe)])
 async def upload_stock(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -58,8 +59,8 @@ async def upload_stock(
         ))
         db.commit()
 
-        resultado = assign_positions(db)
-
+        resultado = assign_positions(db, inventario_df=inventario)
+        
         return {
             "cleansing_report": cleansing_report,
             "skus_en_bodega": cleansing_report["skus_en_bodega"],

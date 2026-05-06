@@ -1,12 +1,12 @@
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from app.core.config import settings
-from app.core.database import engine, Base
-import app.models  # noqa: F401
-from app.routers import uploads, products, inventory
-from app.services.seed_positions import seed_warehouse_positions
 from sqlalchemy.orm import Session
-from app.core.database import get_db
+
+from app.core.config import settings
+from app.core.database import engine, Base, get_db
+from app.core.security import require_jefe
+from app.routers import uploads, products, inventory, auth
+import app.models  # noqa: F401
 
 app = FastAPI(
     title="ReOrdena-ABC API",
@@ -27,28 +27,28 @@ app.add_middleware(
 def on_startup():
     Base.metadata.create_all(bind=engine)
 
-app.include_router(uploads.router) 
+
+app.include_router(auth.router)
+app.include_router(uploads.router)
 app.include_router(products.router)
 app.include_router(inventory.router)
 
+
 @app.get("/health", tags=["Sistema"])
 def health_check():
-    return {
-        "status": "ok",
-        "service": "ReOrdena-ABC",
-        "version": "0.1.0",
-    }
-    
-@app.post("/admin/seed-positions", tags=["Admin"])
+    return {"status": "ok", "service": "ReOrdena-ABC", "version": "0.1.0"}
+
+
+@app.post("/admin/seed-positions", tags=["Admin"], dependencies=[Depends(require_jefe)])
 def seed_positions(db: Session = Depends(get_db)):
+    from app.services.seed_positions import seed_warehouse_positions
     return seed_warehouse_positions(db)
 
-@app.post("/admin/reset-positions", tags=["Admin"])
+
+@app.post("/admin/reset-positions", tags=["Admin"], dependencies=[Depends(require_jefe)])
 def reset_positions(db: Session = Depends(get_db)):
     from app.models.warehouse_position import WarehousePosition
-    db.query(WarehousePosition).update({
-        "product_id": None,
-        "is_occupied": False,
-    })
+    from sqlalchemy import text
+    db.execute(text("UPDATE warehouse_positions SET product_id = NULL, is_occupied = FALSE"))
     db.commit()
     return {"mensaje": "Todas las posiciones liberadas"}

@@ -2,6 +2,8 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
 import io
+from fastapi import APIRouter, UploadFile, File, Depends, HTTPException
+from app.core.security import require_jefe
 
 from app.core.database import get_db
 from app.models.sales_upload import SalesUpload
@@ -13,7 +15,7 @@ from app.schemas.upload import UploadResponse
 router = APIRouter(prefix="/uploads", tags=["Carga de Archivos"])
 
 
-@router.post("/matr780", response_model=UploadResponse)
+@router.post("/matr780", response_model=UploadResponse, dependencies=[Depends(require_jefe)])
 async def upload_matr780(
     file: UploadFile = File(...),
     db: Session = Depends(get_db),

@@ -1,6 +1,18 @@
 import pandas as pd
 from typing import Tuple
 
+# Palabras clave de productos excluidos de esta bodega
+PRODUCTOS_EXCLUIDOS = [
+    'OPTISLIP',
+    'INCROMOLD', 
+    'INCROSLIP',
+    'KEMELIX',
+    'ATMER',
+]
+
+def producto_excluido(descripcion: str) -> bool:
+    desc_upper = str(descripcion).upper()
+    return any(keyword in desc_upper for keyword in PRODUCTOS_EXCLUIDOS)
 
 def clean_matr780(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
     """
@@ -14,6 +26,7 @@ def clean_matr780(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
         "duplicados_removidos": 0,
         "filas_sin_cantidad": 0,
         "filas_sin_sku": 0,
+        "skus_excluidos": 0,
         "rango_fechas": {}
     }
 
@@ -40,6 +53,12 @@ def clean_matr780(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
 
     df = pd.DataFrame(records)
 
+    # Excluir productos no almacenados en bodega
+    mask_excluidos = df['descripcion'].apply(producto_excluido)
+    excluidos_count = mask_excluidos.sum()
+    report["skus_excluidos"] = int(excluidos_count)
+    df = df[~mask_excluidos]
+    
     if df.empty:
         raise ValueError(
             "El archivo no contiene datos válidos. "
