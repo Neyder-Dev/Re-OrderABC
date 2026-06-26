@@ -38,7 +38,10 @@ def clean_matr780(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
     # SKU en col 0 (numérico de 8+ dígitos), cantidad en col 6
     records = []
     for _, row in df_raw.iterrows():
-        sku = str(row[0]).strip() if pd.notna(row[0]) else ""
+        try:
+            sku = str(int(float(row[0]))).strip() if pd.notna(row[0]) else ""
+        except (ValueError, TypeError):
+            sku = str(row[0]).strip() if pd.notna(row[0]) else ""
         if sku.isdigit() and len(sku) >= 8:
             records.append({
                 "sku":         sku,
