@@ -44,7 +44,7 @@ function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              placeholder="correo@barentz.com"
+              placeholder="usuario@correo.com"
               required
             />
           </div>
@@ -77,7 +77,7 @@ function Login() {
         </form>
 
         <p className="text-center text-xs text-gray-300 mt-6">
-          ReOrdena-ABC v0.1.0 — GastroABC
+          ReOrdena-ABC v0.1.0 — Proyecto Universitario
         </p>
       </div>
     </div>

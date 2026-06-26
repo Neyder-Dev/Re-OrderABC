@@ -1,10 +1,9 @@
 from pydantic_settings import BaseSettings
-import os
 
 
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://gastro:gastro123@localhost:5432/reordena_abc"
-    SECRET_KEY: str = "cambia-esto-en-produccion"
+    DATABASE_URL: str
+    SECRET_KEY: str
     ALLOWED_ORIGINS: str = "http://localhost:5173"
 
     class Config:

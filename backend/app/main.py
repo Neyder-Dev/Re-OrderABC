@@ -35,8 +35,14 @@ app.include_router(inventory.router)
 
 
 @app.get("/health", tags=["Sistema"])
-def health_check():
-    return {"status": "ok", "service": "ReOrdena-ABC", "version": "0.1.0"}
+def health_check(db: Session = Depends(get_db)):
+    try:
+        from sqlalchemy import text
+        db.execute(text("SELECT 1"))
+        db_status = "ok"
+    except Exception:
+        db_status = "error"
+    return {"status": "ok", "db": db_status, "service": "ReOrdena-ABC", "version": "0.1.0"}
 
 
 @app.post("/admin/seed-positions", tags=["Admin"], dependencies=[Depends(require_jefe)])

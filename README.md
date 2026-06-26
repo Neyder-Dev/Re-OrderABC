@@ -98,46 +98,94 @@ El motor clasifica cada SKU según su participación acumulada en las ventas del
 - Python 3.11+ (para desarrollo local sin Docker)
 - Node.js 18+
 
-### Con Docker (recomendado)
+### Desarrollo local (sin Docker)
 
 ```bash
+# 1. Clona el repositorio
 git clone https://github.com/tu-usuario/reordena-abc.git
 cd reordena-abc
-cp backend/.env.example backend/.env   # Ajusta las variables
-docker-compose up --build
+
+# 2. Backend
+cd backend
+cp .env.example .env          # Edita con tus valores locales
+python -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload
+
+# 3. Frontend (otra terminal)
+cd frontend
+cp .env.example .env.local    # Edita VITE_API_URL=http://localhost:8000
+npm install
+npm run dev
 ```
 
-| Servicio | URL |
+| Servicio | URL local |
 |---|---|
 | API REST | http://localhost:8000 |
 | Swagger (docs) | http://localhost:8000/docs |
 | Frontend | http://localhost:5173 |
 
-### Sin Docker (desarrollo local)
-
-```bash
-# Backend
-cd backend
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
-
-# Frontend (otra terminal)
-cd frontend
-npm install && npm run dev
-```
-
 ---
 
 ## Variables de Entorno
 
-Copia `backend/.env.example` a `backend/.env` y completa:
+### Backend (`backend/.env`)
 
 ```env
-DATABASE_URL=postgresql://usuario:password@localhost:5432/reordena_abc
-SECRET_KEY=cambia-esto-en-produccion
-ALLOWED_ORIGINS=http://localhost:5173
+DATABASE_URL=postgresql://usuario:password@host:5432/reordena_abc
+SECRET_KEY=genera-con-openssl-rand-hex-32
+ALLOWED_ORIGINS=http://localhost:5173,https://tu-app.vercel.app
+ADMIN_EMAIL=admin@reordena.com
+ADMIN_PASSWORD=CambiaEstaContrasena2024!
 ```
+
+> Genera una `SECRET_KEY` segura: `openssl rand -hex 32`
+
+### Frontend (`frontend/.env.local`)
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+---
+
+## Despliegue en Producción
+
+### Backend → Railway
+
+1. Crea un nuevo proyecto en [Railway](https://railway.app)
+2. Agrega un servicio **PostgreSQL** — Railway provee `DATABASE_URL` automáticamente
+3. Conecta tu repositorio de GitHub al proyecto
+4. Railway detecta `railway.json` en la raíz y usa `backend/Dockerfile` automáticamente
+5. En **Variables** del servicio agrega:
+
+   | Variable | Valor |
+   |---|---|
+   | `SECRET_KEY` | Resultado de `openssl rand -hex 32` |
+   | `ALLOWED_ORIGINS` | URL de tu frontend en Vercel (ej: `https://reordena-abc.vercel.app`) |
+   | `ADMIN_EMAIL` | Tu correo de administrador |
+   | `ADMIN_PASSWORD` | Contraseña segura |
+
+6. Una vez desplegado, crea el usuario administrador ejecutando desde Railway Shell:
+   ```bash
+   python crear_jefe.py
+   ```
+
+### Frontend → Vercel
+
+1. Importa el repositorio en [Vercel](https://vercel.com)
+2. En la configuración del proyecto:
+   - **Root Directory:** `frontend`
+   - **Build Command:** `npm run build`
+   - **Output Directory:** `dist`
+3. En **Environment Variables** agrega:
+
+   | Variable | Valor |
+   |---|---|
+   | `VITE_API_URL` | URL de tu backend en Railway (ej: `https://tu-backend.up.railway.app`) |
+
+4. Vercel detecta `frontend/vercel.json` y configura el routing de la SPA automáticamente
 
 ---
 
@@ -170,4 +218,4 @@ ALLOWED_ORIGINS=http://localhost:5173
 
 ---
 
-*ReOrdena-ABC — Desarrollado para Neyder-Dev · MVP objetivo: Junio 2025*
+*ReOrdena-ABC — Proyecto Universitario · MVP v0.1.0*

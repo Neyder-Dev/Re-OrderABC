@@ -5,8 +5,8 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: reordena_abc
-      POSTGRES_USER: gastro
-      POSTGRES_PASSWORD: gastro123
+      POSTGRES_USER: reordena
+      POSTGRES_PASSWORD: reordena_dev_2024
     ports:
       - "5432:5432"
     volumes:
