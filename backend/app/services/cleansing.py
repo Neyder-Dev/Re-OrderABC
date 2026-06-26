@@ -51,6 +51,12 @@ def clean_matr780(file_bytes: bytes) -> Tuple[pd.DataFrame, dict]:
                 "valor_total": row[8] if pd.notna(row[8]) else 0,
             })
 
+    if not records:
+        raise ValueError(
+            "No se encontraron filas válidas en el archivo. "
+            "Verifica que sea un reporte MATR780 exportado como Planilla y que la columna A contenga SKUs numéricos de 8 o más dígitos."
+        )
+
     df = pd.DataFrame(records)
 
     # Excluir productos no almacenados en bodega
