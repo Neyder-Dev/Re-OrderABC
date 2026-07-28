@@ -52,3 +52,9 @@ def reset_positions(db: Session = Depends(get_db)):
     db.execute(text("UPDATE warehouse_positions SET product_id = NULL, is_occupied = FALSE"))
     db.commit()
     return {"mensaje": "Todas las posiciones liberadas"}
+
+@app.post("/admin/run-seed", tags=["Admin"])
+def run_seed_endpoint():
+    from seed_demo import run_seed
+    run_seed()
+    return {"mensaje": "Seed ejecutado exitosamente"}
