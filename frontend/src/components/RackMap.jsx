@@ -16,9 +16,7 @@ const ZONE_COLORS_EMPTY = {
 const LEVEL_LABELS = { 1: 'Techo', 2: 'Medio', 3: 'Piso' }
 const ZONE_POR_NIVEL = { 3: 'A', 2: 'B', 1: 'C' }
 
-function Celda({ code, producto, zona, seleccionado, onClick }) {
-  const [tooltip, setTooltip] = useState(null)
-
+function Celda({ code, producto, zona, seleccionado, onClick, tooltipDir }) {
   const ocupada = !!producto
   const esSeleccionado = seleccionado?.position_code === code
 
@@ -31,68 +29,37 @@ function Celda({ code, producto, zona, seleccionado, onClick }) {
     colorClass = ZONE_COLORS_EMPTY[zona]
   }
 
-  const handleMouseEnter = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect()
-    const tooltipWidth = 220
-    const viewportWidth = window.innerWidth
-
-    // Calcular posición horizontal sin salirse de pantalla
-    let left = rect.left + rect.width / 2
-    if (left - tooltipWidth / 2 < 8) left = tooltipWidth / 2 + 8
-    if (left + tooltipWidth / 2 > viewportWidth - 8) left = viewportWidth - tooltipWidth / 2 - 8
-
-    // Mostrar abajo si está en la parte superior de la pantalla
-    const showBelow = rect.top < 160
-
-    setTooltip({ left, top: rect.top, bottom: rect.bottom, showBelow })
-  }
-
-  const handleMouseLeave = () => setTooltip(null)
+  const posClass = tooltipDir === 'down' ? 'top-6' : 'bottom-6'
 
   return (
     <div
       onClick={() => onClick(code, producto)}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`w-5 h-5 rounded-sm border cursor-pointer transition hover:scale-110 relative ${colorClass}`}
+      className={`w-5 h-5 rounded-sm border cursor-pointer transition hover:scale-110 relative group ${colorClass}`}
     >
-      {tooltip && (ocupada || (!ocupada && seleccionado)) && (
+      {ocupada && (
         <div
-          className="fixed z-50 bg-gray-900 text-white text-xs rounded p-2 shadow-xl pointer-events-none"
-          style={{
-            width: '220px',
-            left: `${tooltip.left}px`,
-            transform: 'translateX(-50%)',
-            ...(tooltip.showBelow
-              ? { top: `${tooltip.bottom + 6}px` }
-              : { bottom: `${window.innerHeight - tooltip.top + 6}px` }
-            ),
-          }}
+          className={`absolute ${posClass} left-0 hidden group-hover:block z-50 bg-gray-900 text-white text-xs rounded p-2 shadow-xl pointer-events-none`}
+          style={{ width: '200px', wordBreak: 'break-word', whiteSpace: 'normal' }}
         >
-          {ocupada ? (
-            <>
-              <p className="font-bold text-blue-300">{code}</p>
-              <p className="text-gray-400">{producto.sku}</p>
-              <p
-                className="text-white mt-0.5"
-                style={{ wordBreak: 'break-word', whiteSpace: 'normal' }}
-              >
-                {producto.name}
-              </p>
-              <p className={`font-bold mt-1 ${
-                producto.abc_zone === 'A' ? 'text-red-400' :
-                producto.abc_zone === 'B' ? 'text-yellow-400' : 'text-green-400'
-              }`}>
-                Zona {producto.abc_zone}
-              </p>
-              <p className="text-gray-500 mt-1">Click para mover</p>
-            </>
-          ) : (
-            <>
-              <p className="font-bold text-blue-300">{code}</p>
-              <p className="text-green-400">Mover aquí →</p>
-            </>
-          )}
+          <p className="font-bold text-blue-300">{code}</p>
+          <p className="text-gray-400">{producto.sku}</p>
+          <p className="text-white mt-0.5">{producto.name}</p>
+          <p className={`font-bold mt-1 ${
+            producto.abc_zone === 'A' ? 'text-red-400' :
+            producto.abc_zone === 'B' ? 'text-yellow-400' : 'text-green-400'
+          }`}>
+            Zona {producto.abc_zone}
+          </p>
+          <p className="text-gray-500 mt-1">Click para mover</p>
+        </div>
+      )}
+      {!ocupada && seleccionado && (
+        <div
+          className={`absolute ${posClass} left-0 hidden group-hover:block z-50 bg-gray-900 text-white text-xs rounded p-2 shadow-xl pointer-events-none`}
+          style={{ width: '160px' }}
+        >
+          <p className="font-bold text-blue-300">{code}</p>
+          <p className="text-green-400">Mover aquí →</p>
         </div>
       )}
     </div>
